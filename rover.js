@@ -22,10 +22,13 @@ new (function() {
     // final argument. This should be called to indicate that the block can
     // stop waiting.
     ext.move_forward = function(callback) {
-     socket.send('move100');
-        window.setTimeout(function() {
-            callback();
-        }, wait*1000);
+        socket.send('move100');
+        //TODO set timeout waiting for response
+        socket.onmessage = function (evt) {
+            if ( evt.data == 'allCommandsComplete'){
+                callback();
+            }
+       };
     };
 
     // Block and block menu descriptions
