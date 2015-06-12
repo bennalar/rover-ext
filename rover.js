@@ -9,7 +9,6 @@ new (function() {
     var port = 42004;
 
     var socket = new WebSocket('ws://' + ipAddress + ':' + port);
-    timeoutID = window.setTimeout(noServerAlert, 2000);
     
     // Cleanup function when the extension is unloaded
     ext._shutdown = function() {};
@@ -27,7 +26,6 @@ new (function() {
     // final argument. This should be called to indicate that the block can
     // stop waiting.
     ext.move_forward = function(callback) {
-        window.clearTimeout(timeoutID);
         socket.send('move100');
         //TODO set timeout waiting for response
         socket.onmessage = function (evt) {
