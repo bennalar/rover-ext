@@ -4,7 +4,7 @@
 new (function() {
     var ext = this;
      
-    var ipAddress = '127.0.0.1';
+    var ipAddress = 'localhost';
     var port = 42004;
 
     var socket = new WebSocket('ws://' + ipAddress + ':' + port);
