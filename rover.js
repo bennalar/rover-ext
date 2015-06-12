@@ -4,6 +4,7 @@
 new (function() {
     var ext = this;
      
+    var serverStatus = 0;
     var ipAddress = 'localhost';
     var port = 42004;
 
@@ -16,7 +17,10 @@ new (function() {
     // Status reporting code
     // Use this to report missing hardware, plugin or unsupported browser
     ext._getStatus = function() {
-        return {status: 2, msg: 'Ready'};
+        if( socket.readyState == 1){
+            return {status: 2, msg: 'Ready'};
+        }
+        return {status: 0, msg: 'Not connected'};
     };
 
     // Functions for block with type 'w' will get a callback function as the 
