@@ -29,6 +29,7 @@ new (function() {
         socket.send('move100');
         //TODO set timeout waiting for response
         socket.onmessage = function (evt) {
+            alert(evt.data);
             if ( evt.data == 'allCommandsComplete'){
                 callback();
             }
