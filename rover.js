@@ -65,6 +65,10 @@ new (function() {
     
     // Submits command as a string
     function submitCommand(cmdString) {
+        // If not connected - try again
+        if( socket.readyState > 1){
+            connectToServer();
+        }
         socket.send(cmdString);
     }
 
