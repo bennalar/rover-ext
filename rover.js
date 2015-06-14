@@ -24,11 +24,6 @@ new (function() {
     // Status reporting code
     // Use this to report missing hardware, plugin or unsupported browser
     ext._getStatus = function() {
-        // If not connected - try again
-        if( socket.readyState > 1){
-            connectToServer();
-        }
-        
         if( socket.readyState == 1){
             return {status: 2, msg: 'Ready'};
         }
@@ -65,26 +60,32 @@ new (function() {
         socket = new WebSocket('ws://' + ipAddress + ':' + port);
         socket.onopen = function(){
             socket.send('reset');
-            readyForCommand = true;
+            setTimeout(function(){readyForCommand = true;}, 1000);
         }
+        
         socket.onerror = function (error) {
             console.log('WebSocket Error ' + error);
+            setTimeout(function(){
+                if(socket.readyState == 0){
+                    //do nothing
+                }
+                else if (socket.readyState !=1){
+                    //fallback
+                    setInterval(connectToServer, 2000);
+                }
+            },50);
         };
+        
         socket.onclose = function () {
-            console.log('Socket closed');
             readyForCommand = false;
+            console.log('Socket closed');
+            connectToServer();
         };
         
     }
     
     // Submits command as a string
     function submitCommand(cmdString) {
-        // If not connected - try again
-        if( socket.readyState > 1){
-            connectToServer();
-        }
-        // Wait if not connected yet - FIXME to wait instead of loop
-        while (socket.readyState != 1){}
         socket.send(cmdString);
     }
 
