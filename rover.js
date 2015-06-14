@@ -39,7 +39,7 @@ new (function() {
         socket.onmessage = function (evt) {
             console.log('onopen message received');
             if ( evt.data.slice(0, commandCompletedCmd.length) == commandCompletedCmd ){
-                if( event.data.slice(commandCompletedCmd.length+1, 1) == '1'){
+                if( event.data.slice(commandCompletedCmd.length+1) == '1'){
                     callback();
                 }
                 //Todo: error?
