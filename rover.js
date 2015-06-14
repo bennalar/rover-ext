@@ -79,7 +79,7 @@ new (function() {
     		reporterVariable = "roverHeadingDegrees"
     	}
     	else{
-    		reporterVariable = "rover"+pos.toUpperCase
+    		reporterVariable = "rover"+pos.toUpperCase()
     	}
         addWaitingReporterCallback(reporterVariable, callback);
         requestReporterValue(reporterVariable);
