@@ -17,6 +17,10 @@ new (function() {
     connectToServer();
     
     ext.resetAll = function() {
+    	if(socket.readyState > 1){
+            //try to reconnect
+            connectToServer();
+        }
     	socket.send('reset');
     	waitingReporterCallbacks = {};
     	waitingCommandCallback = null;
