@@ -101,7 +101,7 @@ new (function() {
     
     function callWaitingReporterCallback(reporterName, reporterValue){
     	if( waitingReporterCallbacks[reporterName] != null ){
-   	    (waitingReporterCallbacks[reporterName])();
+   	    (waitingReporterCallbacks[reporterName])(reporterValue);
    	    waitingReporterCallbacks[reporterName] = null;
     	}
     	else
