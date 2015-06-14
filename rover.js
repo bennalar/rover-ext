@@ -33,8 +33,8 @@ new (function() {
     // Functions for block with type 'w' will get a callback function as the 
     // final argument. This should be called to indicate that the block can
     // stop waiting.
-    ext.move_forward = function(callback) {
-        socket.send('move100');
+    ext.move_forward = function(distance, callback) {
+        socket.send('move'+distance);
         //TODO set timeout waiting for response
         socket.onmessage = function (evt) {
             console.log('onopen message received');
