@@ -122,7 +122,7 @@ new (function() {
     	    // get reporter key
     	    vals = msg.data.split(" ");
     	    if ( vals.length == 3 ){
-                callWaitingReporterCallback(msg.data[1], msg.data[2]);
+                callWaitingReporterCallback(vals[1], vals[2]);
             }
             else{
             	console.log('Invalid reporter data returned from server:'+msg.data)
