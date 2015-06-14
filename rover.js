@@ -20,10 +20,11 @@ new (function() {
     // Status reporting code
     // Use this to report missing hardware, plugin or unsupported browser
     ext._getStatus = function() {
-        console.log("getstatus");
         if( socket.readyState == 1){
             return {status: 2, msg: 'Ready'};
         }
+        //todo try reconnecting
+        
         return {status: 0, msg: 'Not connected'};
     };
     
