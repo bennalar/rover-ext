@@ -106,7 +106,7 @@ new (function() {
     	}
     	else
     	{
-   	    console.log('Unexpected reporter callback:'+str(reporterName))
+   	    console.log('Unexpected reporter callback:'+reporterName)
     	}
     }
     
@@ -125,11 +125,11 @@ new (function() {
                 callWaitingReporterCallback(msg.data[1], msg.data[2]);
             }
             else{
-            	console.log('Invalid reporter data returned from server:'+str(msg.data))
+            	console.log('Invalid reporter data returned from server:'+msg.data)
             }
 	}
 	else{
-	    console.log('Unexpected command returned from server:'+str(msg.data))
+	    console.log('Unexpected command returned from server:'+msg.data)
 	}
     }
     
