@@ -22,7 +22,14 @@ new (function() {
             connectToServer();
         }
     	socket.send('reset');
+    	// Call all callbacks to prevent GUI from hanging
+    	for(waitingReporterCallback in waitingReporterCallbacks){
+    		waitingReporterCallback("");
+    	}
     	waitingReporterCallbacks = {};
+    	if( waitingCommandCallback ){
+    		waitingCommandCallback();
+    	}
     	waitingCommandCallback = null;
     };
     
