@@ -10,11 +10,16 @@ new (function() {
     var readyForCommand = false;
     var CONNECTION_RETRY_INTERVAL = 10000; //10 secs
     
+    var waitingReporterCallbacks = {};
+    var waitingCommandCallback = null;
+    
     var socket;
     connectToServer();
     
     ext.resetAll = function() {
-	    socket.send('reset');
+    	socket.send('reset');
+    	waitingReporterCallbacks = {};
+    	waitingCommandCallback = null;
     };
     
     
@@ -35,22 +40,14 @@ new (function() {
     };
     
     var commandCompletedCmd = 'allCommandsComplete';
+    var reporterResultCmd = 'reporterResult';
 
     // Functions for block with type 'w' will get a callback function as the 
     // final argument. This should be called to indicate that the block can
     // stop waiting.
     ext.forward = function(distance, callback) {
+        setWaitingCommandCallback(callback);
         submitCommand('move'+distance);
-        //TODO set timeout waiting for response
-        socket.onmessage = function (evt) {
-            if ( evt.data.slice(0, commandCompletedCmd.length) == commandCompletedCmd ){
-                if( event.data.slice(commandCompletedCmd.length+1) == '1'){
-                    callback();
-                }
-                //Todo: error?
-            }
-            //todo error?
-       };
     };
     
     ext.reverse = function(distance, callback) {
@@ -58,21 +55,18 @@ new (function() {
     };
     
     ext.right = function(angle, callback) {
+        setWaitingCommandCallback(callback);
         submitCommand('turn'+angle);
-        //TODO set timeout waiting for response
-        socket.onmessage = function (evt) {
-            if ( evt.data.slice(0, commandCompletedCmd.length) == commandCompletedCmd ){
-                if( event.data.slice(commandCompletedCmd.length+1) == '1'){
-                    callback();
-                }
-                //Todo: error?
-            }
-            //todo error?
-       };
     };
     
     ext.left = function(angle, callback) {
         ext.right('-'+angle, callback);
+    };
+    
+    ext.roverPos = function(pos, callback) {
+    	reporterVariable = "rover"+pos.toUpperCase();
+        addWaitingReporterCallback(reporterVariable, callback);
+        requestReporterValue(reporterVariable);
     };
 
     // Block and block menu descriptions
@@ -82,21 +76,77 @@ new (function() {
             ["w", "move Rover backward %n cm", "reverse", 1],
             ["w", "turn Rover left %n degrees", "left", 90],
             ["w", "turn Rover right %n degrees", "right", 90],
+            ["r", "get Rover %m.pos position", "roverPos"],
         ],
         menus: {
             pos: ["x", "y", "headingDegrees"],
         }
     };
     
+    function setWaitingCommandCallback(callback){
+    	waitingCommandCallback = callback;
+    }
+    
+    function callWaitingCommandCallback(){
+    	if( waitingCommandCallback ){
+   	    waitingCommandCallback();
+    	}
+    	//error?
+    	waitingCommandCallback = null;
+    }
+    
+    function addWaitingReporterCallback(reporterName, callback){
+    	waitingReporterCallbacks[reporterName] = callback;
+    }
+    
+    function callWaitingReporterCallback(reporterName, reporterValue){
+    	if( waitingReporterCallbacks[reporterName] != null ){
+   	    (waitingReporterCallbacks[reporterName])();
+   	    waitingReporterCallbacks[reporterName] = null;
+    	}
+    	else
+    	{
+   	    console.log('Unexpected reporter callback:'+str(reporterName))
+    	}
+    }
+    
+    function processMessage(msg){
+    	// Check if a command has completed
+    	if ( msg.data.slice(0, commandCompletedCmd.length) == commandCompletedCmd ){
+    	    if( event.data.slice(commandCompletedCmd.length+1) == '1'){
+                callWaitingCommandCallback();
+            }
+	}
+	//else check if reporter value
+	else if ( msg.data.slice(0, reporterResultCmd.length) == reporterResultCmd ){
+    	    // get reporter key
+    	    vals = msg.data.split(" ");
+    	    if ( vals.length == 3 ){
+                callWaitingReporterCallback(msg.data[1], msg.data[2]);
+            }
+            else{
+            	console.log('Invalid reporter data returned from server:'+str(msg.data))
+            }
+	}
+	else{
+	    console.log('Unexpected command returned from server:'+str(msg.data))
+	}
+    }
+    
     function connectToServer() {
         socket = new WebSocket('ws://' + ipAddress + ':' + port);
         socket.onopen = function(){
             // socket.send('reset');
             // setTimeout(function(){readyForCommand = true;}, 1000);
-        }
+        };
+        
         
         socket.onerror = function (error) {
             console.log('WebSocket Error ' + error);
+        };
+        
+        socket.onmessage = function (msg) {
+        	processMessage(msg);
         };
         
         socket.onclose = function () {
@@ -106,7 +156,10 @@ new (function() {
         };
         
     }
-    var poller = null;
+    function requestReporterValue(reporterName){
+    	submitCommand('reporter'+reporterName);
+    }
+    
     // Submits command as a string
     function submitCommand(cmdString) {
         // if(socket.readyState > 1){
