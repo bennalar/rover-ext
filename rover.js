@@ -10,12 +10,17 @@ new (function() {
 
     var socket = new WebSocket('ws://' + ipAddress + ':' + port);
     
+    socket.onerror = function (error) {
+        console.log('WebSocket Error ' + error);
+    };
+    
     // Cleanup function when the extension is unloaded
     ext._shutdown = function() {};
 
     // Status reporting code
     // Use this to report missing hardware, plugin or unsupported browser
     ext._getStatus = function() {
+        console.log("getstatus");
         if( socket.readyState == 1){
             return {status: 2, msg: 'Ready'};
         }
