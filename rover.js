@@ -76,8 +76,8 @@ new (function() {
         if( socket.readyState > 1){
             connectToServer();
         }
-        // Wait if not connected yet
-        while (socket != 1){}
+        // Wait if not connected yet - FIXME to wait instead of loop
+        while (socket.readyState != 1){}
         socket.send(cmdString);
     }
 
