@@ -31,7 +31,7 @@ new (function() {
         ext.socket.send('move100');
         //TODO set timeout waiting for response
         ext.socket.onmessage = function (evt) {
-            alert(evt.data);
+            console.log('onopen message received');
             if ( evt.data.slice(0, commandCompletedCmd) == commandCompletedCmd ){
                 if( event.date.slice(commandCompletedCmd, 1) = '1'){
                     callback();
