@@ -14,7 +14,11 @@ new (function() {
     
     
     // Cleanup function when the extension is unloaded
-    ext._shutdown = function() {};
+    ext._shutdown = function() {
+        if (socket.readyState <= 1){
+            socket.close();
+        }
+    };
 
     // Status reporting code
     // Use this to report missing hardware, plugin or unsupported browser
@@ -58,6 +62,9 @@ new (function() {
     
     function connectToServer() {
         socket = new WebSocket('ws://' + ipAddress + ':' + port);
+        socket.onopen = function(){
+            submitCommand('reset');
+        }
         socket.onerror = function (error) {
             console.log('WebSocket Error ' + error);
         };
