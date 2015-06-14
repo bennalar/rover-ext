@@ -36,7 +36,7 @@ new (function() {
     // Functions for block with type 'w' will get a callback function as the 
     // final argument. This should be called to indicate that the block can
     // stop waiting.
-    ext.move_forward = function(distance, callback) {
+    ext.forward = function(distance, callback) {
         submitCommand('move'+distance);
         //TODO set timeout waiting for response
         socket.onmessage = function (evt) {
@@ -49,25 +49,52 @@ new (function() {
             //todo error?
        };
     };
+    
+    ext.reverse = function(distance, callback) {
+        ext.forward('-'+distance, callback);
+    };
+    
+    ext.right = function(angle, callback) {
+        submitCommand('turn'+angle);
+        //TODO set timeout waiting for response
+        socket.onmessage = function (evt) {
+            if ( evt.data.slice(0, commandCompletedCmd.length) == commandCompletedCmd ){
+                if( event.data.slice(commandCompletedCmd.length+1) == '1'){
+                    callback();
+                }
+                //Todo: error?
+            }
+            //todo error?
+       };
+    };
+    
+    ext.left = function(angle, callback) {
+        ext.right('-'+angle, callback);
+    };
 
     // Block and block menu descriptions
     var descriptor = {
         blocks: [
-            ['w', 'move Rover forward %n cm', 'move_forward']
+            ['w', 'move Rover forward %n cm', 'forward'],
+            ["w", "move Rover backward %n cm", "reverse", 1],
+            ["w", "turn Rover left %n degrees", "left", 90],
+            ["w", "turn Rover right %n degrees", "right", 90],
         ]
+        
+        menus: {
+            pos: ["x", "y", "headingDegrees"],
+        }
     };
     
     function connectToServer() {
         socket = new WebSocket('ws://' + ipAddress + ':' + port);
         socket.onopen = function(){
-            socket.send('reset');
-            setTimeout(function(){readyForCommand = true;}, 1000);
+            // socket.send('reset');
+            // setTimeout(function(){readyForCommand = true;}, 1000);
         }
         
         socket.onerror = function (error) {
             console.log('WebSocket Error ' + error);
-            //keep trying to reconnect
-            setTimeout(connectToServer, CONNECTION_RETRY_INTERVAL);
         };
         
         socket.onclose = function () {
@@ -77,9 +104,13 @@ new (function() {
         };
         
     }
-    
+    var poller = null;
     // Submits command as a string
     function submitCommand(cmdString) {
+        // if(socket.readyState > 1){
+        //     //keep trying to reconnect
+        //     setTimeout(connectToServer, CONNECTION_RETRY_INTERVAL);
+        // }
         socket.send(cmdString);
     }
 
