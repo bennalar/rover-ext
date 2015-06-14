@@ -8,7 +8,8 @@ new (function() {
     var ipAddress = 'localhost';
     var port = 42004;
 
-    var socket = new WebSocket('ws://' + ipAddress + ':' + port);
+    var socket;
+    connectToServer();
     
     socket.onerror = function (error) {
         console.log('WebSocket Error ' + error);
@@ -23,8 +24,6 @@ new (function() {
         if( socket.readyState == 1){
             return {status: 2, msg: 'Ready'};
         }
-        //todo try reconnecting
-        
         return {status: 0, msg: 'Not connected'};
     };
     
@@ -37,7 +36,6 @@ new (function() {
         socket.send('move'+distance);
         //TODO set timeout waiting for response
         socket.onmessage = function (evt) {
-            console.log('onopen message received');
             if ( evt.data.slice(0, commandCompletedCmd.length) == commandCompletedCmd ){
                 if( event.data.slice(commandCompletedCmd.length+1) == '1'){
                     callback();
@@ -54,6 +52,18 @@ new (function() {
             ['w', 'move Rover forward %n cm', 'move_forward']
         ]
     };
+    
+    function connectToServer() {
+        socket = new WebSocket('ws://' + ipAddress + ':' + port);
+    }
+    
+    // Submits command as a string
+    function submitCommand(cmdString) {
+        if (socket.readyState != 1){
+            connectToServer();
+        }
+        socket.send(cmdString);
+    }
 
     // Register the extension
     ScratchExtensions.register('Dawn Robotics Rover extension', descriptor, ext);
