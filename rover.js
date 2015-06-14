@@ -11,9 +11,7 @@ new (function() {
     var socket;
     connectToServer();
     
-    socket.onerror = function (error) {
-        console.log('WebSocket Error ' + error);
-    };
+    
     
     // Cleanup function when the extension is unloaded
     ext._shutdown = function() {};
@@ -60,13 +58,13 @@ new (function() {
     
     function connectToServer() {
         socket = new WebSocket('ws://' + ipAddress + ':' + port);
+        socket.onerror = function (error) {
+            console.log('WebSocket Error ' + error);
+        };
     }
     
     // Submits command as a string
     function submitCommand(cmdString) {
-        if (socket.readyState != 1){
-            connectToServer();
-        }
         socket.send(cmdString);
     }
 
