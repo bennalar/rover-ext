@@ -7,7 +7,8 @@ new (function() {
     var serverStatus = 0;
     var ipAddress = 'localhost';
     var port = 42004;
-
+    var readyForCommand = false;
+    
     var socket;
     connectToServer();
     
@@ -64,10 +65,16 @@ new (function() {
         socket = new WebSocket('ws://' + ipAddress + ':' + port);
         socket.onopen = function(){
             socket.send('reset');
+            readyForCommand = true;
         }
         socket.onerror = function (error) {
             console.log('WebSocket Error ' + error);
         };
+        socket.onclose = function () {
+            console.log('Socket closed');
+            readyForCommand = false;
+        };
+        
     }
     
     // Submits command as a string
