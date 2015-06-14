@@ -13,6 +13,9 @@ new (function() {
     var socket;
     connectToServer();
     
+    ext.resetAll = function() {
+	    socket.send('reset');
+    };
     
     
     // Cleanup function when the extension is unloaded
