@@ -38,7 +38,7 @@ new (function() {
         //TODO set timeout waiting for response
         socket.onmessage = function (evt) {
             console.log('onopen message received');
-            if ( evt.data.slice(0, len(commandCompletedCmd)) == commandCompletedCmd ){
+            if ( evt.data.slice(0, commandCompletedCmd.length) == commandCompletedCmd ){
                 if( event.date.slice(commandCompletedCmd, 1) = '1'){
                     callback();
                 }
