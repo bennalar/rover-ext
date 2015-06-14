@@ -21,6 +21,11 @@ new (function() {
     // Status reporting code
     // Use this to report missing hardware, plugin or unsupported browser
     ext._getStatus = function() {
+        // If not connected - try again
+        if( socket.readyState > 1){
+            connectToServer();
+        }
+        
         if( socket.readyState == 1){
             return {status: 2, msg: 'Ready'};
         }
@@ -33,7 +38,7 @@ new (function() {
     // final argument. This should be called to indicate that the block can
     // stop waiting.
     ext.move_forward = function(distance, callback) {
-        socket.send('move'+distance);
+        submitCommand('move'+distance);
         //TODO set timeout waiting for response
         socket.onmessage = function (evt) {
             if ( evt.data.slice(0, commandCompletedCmd.length) == commandCompletedCmd ){
