@@ -21,6 +21,8 @@ new (function() {
         }
         return {status: 0, msg: 'Not connected'};
     };
+    
+    var commandCompletedCmd = 'allCommandsComplete';
 
     // Functions for block with type 'w' will get a callback function as the 
     // final argument. This should be called to indicate that the block can
@@ -30,9 +32,13 @@ new (function() {
         //TODO set timeout waiting for response
         socket.onmessage = function (evt) {
             alert(evt.data);
-            if ( evt.data == 'allCommandsComplete'){
-                callback();
+            if ( evt.data.slice(0, commandCompletedCmd) == commandCompletedCmd ){
+                if( event.date.slice(commandCompletedCmd, 1) = '1'){
+                    callback();
+                }
+                //Todo: error?
             }
+            //todo error?
        };
     };
 
