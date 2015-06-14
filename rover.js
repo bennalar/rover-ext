@@ -75,7 +75,12 @@ new (function() {
     };
     
     ext.roverPos = function(pos, callback) {
-    	reporterVariable = "rover"+pos.toUpperCase();
+    	if (pos == 'headingDegrees'){
+    		reporterVariable = "roverHeadingDegrees"
+    	}
+    	else{
+    		reporterVariable = "rover"+pos.toUpperCase
+    	}
         addWaitingReporterCallback(reporterVariable, callback);
         requestReporterValue(reporterVariable);
     };
