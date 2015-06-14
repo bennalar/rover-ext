@@ -8,7 +8,7 @@ new (function() {
     var ipAddress = 'localhost';
     var port = 42004;
     var readyForCommand = false;
-    var CONNECTION_RETRY_INTERVAL = 1000;
+    var CONNECTION_RETRY_INTERVAL = 10000; //10 secs
     
     var socket;
     connectToServer();
@@ -66,13 +66,14 @@ new (function() {
         
         socket.onerror = function (error) {
             console.log('WebSocket Error ' + error);
+            //keep trying to reconnect
+            setTimeout(connectToServer, CONNECTION_RETRY_INTERVAL);
         };
         
         socket.onclose = function () {
             readyForCommand = false;
             console.log('Socket closed');
-            //keep trying to reconnect
-            setTimeout(connectToServer, CONNECTION_RETRY_INTERVAL);
+            
         };
         
     }
