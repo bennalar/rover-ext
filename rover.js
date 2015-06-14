@@ -63,7 +63,7 @@ new (function() {
     function connectToServer() {
         socket = new WebSocket('ws://' + ipAddress + ':' + port);
         socket.onopen = function(){
-            submitCommand('reset');
+            socket.send('reset');
         }
         socket.onerror = function (error) {
             console.log('WebSocket Error ' + error);
@@ -76,6 +76,8 @@ new (function() {
         if( socket.readyState > 1){
             connectToServer();
         }
+        // Wait if not connected yet
+        while (socket != 1){}
         socket.send(cmdString);
     }
 
