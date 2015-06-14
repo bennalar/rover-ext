@@ -76,7 +76,7 @@ new (function() {
             ["w", "move Rover backward %n cm", "reverse", 1],
             ["w", "turn Rover left %n degrees", "left", 90],
             ["w", "turn Rover right %n degrees", "right", 90],
-            ["r", "get Rover %m.pos position", "roverPos"],
+            ["R", "get Rover %m.pos position", "roverPos"],
         ],
         menus: {
             pos: ["x", "y", "headingDegrees"],
