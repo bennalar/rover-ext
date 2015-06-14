@@ -8,7 +8,7 @@ new (function() {
     var ipAddress = 'localhost';
     var port = 42004;
 
-    var ext.socket = new WebSocket('ws://' + ipAddress + ':' + port);
+    var socket = new WebSocket('ws://' + ipAddress + ':' + port);
     
     // Cleanup function when the extension is unloaded
     ext._shutdown = function() {};
@@ -16,7 +16,7 @@ new (function() {
     // Status reporting code
     // Use this to report missing hardware, plugin or unsupported browser
     ext._getStatus = function() {
-        if( ext.socket.readyState == 1){
+        if( socket.readyState == 1){
             return {status: 2, msg: 'Ready'};
         }
         return {status: 0, msg: 'Not connected'};
@@ -28,9 +28,9 @@ new (function() {
     // final argument. This should be called to indicate that the block can
     // stop waiting.
     ext.move_forward = function(callback) {
-        ext.socket.send('move100');
+        socket.send('move100');
         //TODO set timeout waiting for response
-        ext.socket.onmessage = function (evt) {
+        socket.onmessage = function (evt) {
             console.log('onopen message received');
             if ( evt.data.slice(0, commandCompletedCmd) == commandCompletedCmd ){
                 if( event.date.slice(commandCompletedCmd, 1) = '1'){
