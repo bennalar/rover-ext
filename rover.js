@@ -184,7 +184,7 @@ new (function() {
     function connectToServer() {
     	console.log('>connectToServer()');
     	// Check status of socket before attempting to connect
-    	if( socket.readyState == 3){
+    	if( socket == null || socket.readyState == 3){
 	        socket = new WebSocket('ws://' + ipAddress + ':' + port);
 	        socket.onopen = function(){
 	        	console.log('>socket.onopen');
