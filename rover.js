@@ -29,6 +29,7 @@ new (function() {
     
     // ******* Required extension functions *********
     ext.resetAll = function() {
+    	clearAllCallbacks();
     	socket.send('reset');
     };
     
