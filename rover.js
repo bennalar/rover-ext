@@ -29,20 +29,8 @@ new (function() {
     
     // ******* Required extension functions *********
     ext.resetAll = function() {
-    	if(socket.readyState > 1){
-            //try to reconnect
-            connectToServer();
-        }
     	socket.send('reset');
-    	// Call all callbacks to prevent GUI from hanging
-    	for(waitingReporterCallback in waitingReporterCallbacks){
-    		waitingReporterCallback("");
-    	}
-    	waitingReporterCallbacks = {};
-    	if( waitingCommandCallback ){
-    		waitingCommandCallback();
-    	}
-    	waitingCommandCallback = null;
+    	clearAllCallbacks();
     };
     
     
@@ -96,6 +84,19 @@ new (function() {
     
     
     //****** Helper functions for dealing with asynchronous callbacks from server ******
+    function clearAllCallbacks(){
+    	// Call all callbacks to prevent GUI from hanging
+    	for(waitingReporterCallback in waitingReporterCallbacks){
+    		waitingReporterCallback("");
+    	}
+    	waitingReporterCallbacks = {};
+    	if( waitingCommandCallback ){
+    		waitingCommandCallback();
+    	}
+    	waitingCommandCallback = null;
+    }
+    
+    
     function setWaitingCommandCallback(callback){
     	waitingCommandCallback = callback;
     }
@@ -170,6 +171,7 @@ new (function() {
         };
         
         socket.onclose = function (msg) {
+        	clearAllCallbacks();
         	// Set up poller to keep trying to reconnect
         	timeoutId = setInterval(function(){ connectToServer(); }, CONNECTION_RETRY_INTERVAL);
         }
