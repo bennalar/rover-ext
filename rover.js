@@ -171,7 +171,7 @@ new (function() {
         
         socket.onclose = function (msg) {
         	// Set up poller to keep trying to reconnect
-        	timeoutId = setInterval(function(){ connectToServer() }, CONNECTION_RETRY_INTERVAL);
+        	timeoutId = setInterval(function(){ connectToServer(); }, CONNECTION_RETRY_INTERVAL);
         }
         
     }
