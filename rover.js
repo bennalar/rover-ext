@@ -150,6 +150,7 @@ new (function() {
     }
     
     function connectToServer() {
+    	console.log('>connectToServer()');
     	// Clear any timeouts
         socket = new WebSocket('ws://' + ipAddress + ':' + port);
         socket.onopen = function(){
@@ -179,7 +180,7 @@ new (function() {
         	timeoutId = setInterval(function(){ if(socket.readyState == 2) {connectToServer();} }, CONNECTION_RETRY_INTERVAL);
         	console.log('<socket.onclose()');
         }
-        
+        console.log('<connectToServer()');
     }
     
     // Requests a report value for reporterName from the server and sets up callback for when data is recieved
