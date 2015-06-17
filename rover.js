@@ -118,7 +118,7 @@ new (function() {
     	if( waitingReporterCallbacks[reporterName] != null ){
     		// Call callback
    	    	(waitingReporterCallbacks[reporterName])(reporterValue);
-   	    	waitingReporterCallbacks[reporterName] = null;
+   	    	delete waitingReporterCallbacks.splice[reporterName];
     	}
     	else
     	{
