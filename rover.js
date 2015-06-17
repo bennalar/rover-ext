@@ -13,21 +13,21 @@
 
 new (function() {
     var ext = this;
-     
-    var serverStatus = 0;
+    
     var ipAddress = 'localhost';
     var port = 42004;
-    var readyForCommand = false;
-    var CONNECTION_RETRY_INTERVAL = 10000; //10 secs
+    var CONNECTION_RETRY_INTERVAL = 5000; //5 secs
+    var timeoutId = null;
     
+    // We can have multiple reporters in our code - scratch hangs whilst waiting
     var waitingReporterCallbacks = {};
+    // We can only exceute one waiting command concurrently - robot only responds to one command at a time
     var waitingCommandCallback = null;
     
     var socket;
     connectToServer();
     
     // ******* Required extension functions *********
-    
     ext.resetAll = function() {
     	if(socket.readyState > 1){
             //try to reconnect
@@ -93,24 +93,9 @@ new (function() {
     	}
         submitReporterValueCommand(reporterVariable, callback);
     };
-
-    // Block and block menu descriptions
-    var descriptor = {
-        blocks: [
-            ['w', 'move Rover forward %n cm', 'forward'],
-            ["w", "move Rover backward %n cm", "reverse", 1],
-            ["w", "turn Rover left %n degrees", "left", 90],
-            ["w", "turn Rover right %n degrees", "right", 90],
-            ["R", "get Rover %m.pos position", "roverPos"],
-        ],
-        menus: {
-            pos: ["x", "y", "headingDegrees"],
-        }
-    };
     
     
     //****** Helper functions for dealing with asynchronous callbacks from server ******
-    
     function setWaitingCommandCallback(callback){
     	waitingCommandCallback = callback;
     }
@@ -167,8 +152,12 @@ new (function() {
     function connectToServer() {
         socket = new WebSocket('ws://' + ipAddress + ':' + port);
         socket.onopen = function(){
-            // socket.send('reset');
-            // setTimeout(function(){readyForCommand = true;}, 1000);
+            // Clear any timeouts
+            if( timeoutId != null ){
+            	clearInterval(timeoutId);
+            	timeoutId = null;
+            }
+            ext.resetAll();
         };
         
         
@@ -180,21 +169,20 @@ new (function() {
         	processMessage(msg);
         };
         
-        socket.onclose = function () {
-            readyForCommand = false;
-            console.log('Socket closed');
-            
-        };
+        socket.onclose = function (msg) {
+        	// Set up poller to keep trying to reconnect
+        	timeoutId = setInterval(function(){ connectToServer() }, CONNECTION_RETRY_INTERVAL);
+        }
         
     }
     
-    // Requests a report value for reporterName from the server and calls callback once data is received
+    // Requests a report value for reporterName from the server and sets up callback for when data is recieved
     function submitReporterValue(reporterName, callback){
     	addWaitingReporterCallback(reporterName, callback);
     	submitCommand('reporter'+reporterName);
     }
     
-    // 
+    // Submits a waiting command to the server and sets up the callback for when data is recieved
     function submitWaitingCommand(cmdString, callback) {
     	setWaitingCommandCallback(callback);
         submitCommand(cmdString);
@@ -204,6 +192,21 @@ new (function() {
     function submitCommand(cmdString) {
         socket.send(cmdString);
     }
+    
+    
+    //****** Block and block menu descriptions ******
+    var descriptor = {
+        blocks: [
+            ['w', 'move Rover forward %n cm', 'forward', 1],
+            ["w", "move Rover backward %n cm", "reverse", 1],
+            ["w", "turn Rover left %n degrees", "left", 90],
+            ["w", "turn Rover right %n degrees", "right", 90],
+            ["R", "get Rover %m.pos position", "roverPos"],
+        ],
+        menus: {
+            pos: ["x", "y", "headingDegrees"],
+        }
+    };
 
     // Register the extension
     ScratchExtensions.register('Dawn Robotics Rover extension', descriptor, ext);
