@@ -82,6 +82,37 @@ new (function() {
         submitReporterValueCommand(reporterVariable, callback);
     };
     
+    ext.detectArtifact = function(callback) {
+    	submitWaitingCommand('detectArtifact', callback);
+    };
+    
+    ext.artifactID = function(callback) {
+        submitReporterValueCommand('artifactID', callback);
+    };
+    
+    ext.artifactPos = function(pos, callback) {
+    	if (pos == 'headingDegrees'){
+    		reporterVariable = "artifactBearingDegrees"
+    	}
+    	else{
+    		reporterVariable = "artifact"+pos.toUpperCase()
+    	}
+        submitReporterValueCommand(reporterVariable, callback);
+    };
+    
+    ext.obstaclePos = function(id, pos, callback) {
+    	if (pos == 'headingDegrees'){
+    		reporterVariable = "Obstacle_"+id+"_HeadingDegrees"
+    	}
+    	else{
+    		reporterVariable = "Obstacle_"+id+"_"+pos.toUpperCase()
+    	}
+        submitReporterValueCommand(reporterVariable, callback);
+    };
+    
+    ext.ultrasonicRangeCM = function(callback) {
+        submitReporterValueCommand('ultrasonicRangeCM', callback);
+    };
     
     //****** Helper functions for dealing with asynchronous callbacks from server ******
     function clearAllCallbacks(){
@@ -209,7 +240,12 @@ new (function() {
             ["w", "move Rover backward %n cm", "reverse", 1],
             ["w", "turn Rover left %n degrees", "left", 90],
             ["w", "turn Rover right %n degrees", "right", 90],
-            ["R", "get Rover %m.pos position", "roverPos"],
+            ["R", "get Rover %m.pos position", "roverPos", 0],
+            ["w", "detect artifact using camera", "detectArtifact"],
+	        ["R", "get detected artifact id", "artifactID", -1],
+	        ["R", "get Artifact %m.pos position", "artifactPos"],
+	        ["R", "get Obstacle %n %m.pos position", "obstaclePos", 1],
+	        ["R", "get sonar distance", "ultrasonicRangeCM", 0],
         ],
         menus: {
             pos: ["x", "y", "headingDegrees"],
