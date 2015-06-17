@@ -29,8 +29,8 @@ new (function() {
     
     // ******* Required extension functions *********
     ext.resetAll = function() {
-    	socket.send('reset');
     	clearAllCallbacks();
+    	socket.send('reset');
     };
     
     
@@ -151,14 +151,18 @@ new (function() {
     }
     
     function connectToServer() {
+    	// Clear any timeouts
         socket = new WebSocket('ws://' + ipAddress + ':' + port);
         socket.onopen = function(){
+        	console.log('>socket.onopen');
             // Clear any timeouts
             if( timeoutId != null ){
+            	console.log('clearing timeout');
             	clearInterval(timeoutId);
             	timeoutId = null;
             }
             ext.resetAll();
+            console.log('<socket.onopen');
         };
         
         
@@ -170,10 +174,12 @@ new (function() {
         	processMessage(msg);
         };
         
-        socket.onclose = function (msg) {
+        socket.onclose = function () {
+        	console.log('>socket.onclose()');
         	clearAllCallbacks();
         	// Set up poller to keep trying to reconnect
         	timeoutId = setInterval(function(){ connectToServer(); }, CONNECTION_RETRY_INTERVAL);
+        	console.log('<socket.onclose()');
         }
         
     }
