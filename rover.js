@@ -183,7 +183,7 @@ new (function() {
     }
     
     // Requests a report value for reporterName from the server and sets up callback for when data is recieved
-    function submitReporterValue(reporterName, callback){
+    function submitReporterValueCommand(reporterName, callback){
     	addWaitingReporterCallback(reporterName, callback);
     	submitCommand('reporter'+reporterName);
     }
