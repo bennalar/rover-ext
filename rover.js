@@ -161,7 +161,6 @@ new (function() {
             	clearInterval(timeoutId);
             	timeoutId = null;
             }
-            ext.resetAll();
             console.log('<socket.onopen');
         };
         
