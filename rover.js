@@ -1,5 +1,15 @@
 /* Extension for the Dawn Robotics' rover robot */
 /* Phil Bennett <philipbennett28@gmail.com>, Jun 2015 */
+/*
+	This script communicates with a WebSocket service running on ipAddress (default: localhost) at the 
+	specified port (default: 42004).
+	
+	The webservice may be acting as a simulator or a communication bridge to the robot.
+	This script mostly uses the asyncronous scratch functions. It sends an async requst to the server
+	and then calls the relevant callback which updates the scratch data. The benefit of using the async
+	callback is that the scratch interpreter will wait on the command block until a response is received.
+
+*/
 
 new (function() {
     var ext = this;
@@ -15,6 +25,8 @@ new (function() {
     
     var socket;
     connectToServer();
+    
+    // ******* Required extension functions *********
     
     ext.resetAll = function() {
     	if(socket.readyState > 1){
@@ -53,24 +65,22 @@ new (function() {
     var commandCompletedCmd = 'allCommandsComplete';
     var reporterResultCmd = 'reporterResult';
 
-    // Functions for block with type 'w' will get a callback function as the 
-    // final argument. This should be called to indicate that the block can
-    // stop waiting.
+	//****** Scratch blocks *******
     ext.forward = function(distance, callback) {
-        setWaitingCommandCallback(callback);
-        submitCommand('move'+distance);
+    	submitWaitingCommand('move'+distance, callback);
     };
     
     ext.reverse = function(distance, callback) {
+    	// Opposite of forward
         ext.forward('-'+distance, callback);
     };
     
     ext.right = function(angle, callback) {
-        setWaitingCommandCallback(callback);
-        submitCommand('turn'+angle);
+        submitWaitingCommand('turn'+angle, callback);
     };
     
     ext.left = function(angle, callback) {
+    	// Opposite of right
         ext.right('-'+angle, callback);
     };
     
@@ -81,8 +91,7 @@ new (function() {
     	else{
     		reporterVariable = "rover"+pos.toUpperCase()
     	}
-        addWaitingReporterCallback(reporterVariable, callback);
-        requestReporterValue(reporterVariable);
+        submitReporterValueCommand(reporterVariable, callback);
     };
 
     // Block and block menu descriptions
@@ -99,13 +108,17 @@ new (function() {
         }
     };
     
+    
+    //****** Helper functions for dealing with asynchronous callbacks from server ******
+    
     function setWaitingCommandCallback(callback){
     	waitingCommandCallback = callback;
     }
     
     function callWaitingCommandCallback(){
     	if( waitingCommandCallback ){
-   	    waitingCommandCallback();
+    		// Call callback
+   	    	waitingCommandCallback();
     	}
     	//error?
     	waitingCommandCallback = null;
@@ -117,25 +130,27 @@ new (function() {
     
     function callWaitingReporterCallback(reporterName, reporterValue){
     	if( waitingReporterCallbacks[reporterName] != null ){
-   	    (waitingReporterCallbacks[reporterName])(reporterValue);
-   	    waitingReporterCallbacks[reporterName] = null;
+    		// Call callback
+   	    	(waitingReporterCallbacks[reporterName])(reporterValue);
+   	    	waitingReporterCallbacks[reporterName] = null;
     	}
     	else
     	{
-   	    console.log('Unexpected reporter callback:'+reporterName)
+   	    	console.log('Unexpected reporter callback:'+reporterName)
     	}
     }
     
+    // Parses a WebSocket message from the server and calls the relevant callback function
     function processMessage(msg){
     	// Check if a command has completed
     	if ( msg.data.slice(0, commandCompletedCmd.length) == commandCompletedCmd ){
-    	    if( event.data.slice(commandCompletedCmd.length+1) == '1'){
-                callWaitingCommandCallback();
+    		if( event.data.slice(commandCompletedCmd.length+1) == '1'){
+				callWaitingCommandCallback();
             }
-	}
-	//else check if reporter value
-	else if ( msg.data.slice(0, reporterResultCmd.length) == reporterResultCmd ){
-    	    // get reporter key
+		}
+		//else check if reporter value
+		else if ( msg.data.slice(0, reporterResultCmd.length) == reporterResultCmd ){
+			// get reporter key
     	    vals = msg.data.split(" ");
     	    if ( vals.length == 3 ){
                 callWaitingReporterCallback(vals[1], vals[2]);
@@ -143,10 +158,10 @@ new (function() {
             else{
             	console.log('Invalid reporter data returned from server:'+msg.data)
             }
-	}
-	else{
-	    console.log('Unexpected command returned from server:'+msg.data)
-	}
+		}
+		else{
+	    	console.log('Unexpected command returned from server:'+msg.data)
+		}
     }
     
     function connectToServer() {
@@ -172,16 +187,21 @@ new (function() {
         };
         
     }
-    function requestReporterValue(reporterName){
+    
+    // Requests a report value for reporterName from the server and calls callback once data is received
+    function submitReporterValue(reporterName, callback){
+    	addWaitingReporterCallback(reporterName, callback);
     	submitCommand('reporter'+reporterName);
     }
     
-    // Submits command as a string
+    // 
+    function submitWaitingCommand(cmdString, callback) {
+    	setWaitingCommandCallback(callback);
+        submitCommand(cmdString);
+    }
+    
+    // Submits command as a string to the server
     function submitCommand(cmdString) {
-        // if(socket.readyState > 1){
-        //     //keep trying to reconnect
-        //     setTimeout(connectToServer, CONNECTION_RETRY_INTERVAL);
-        // }
         socket.send(cmdString);
     }
 
