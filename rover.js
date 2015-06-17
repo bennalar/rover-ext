@@ -209,7 +209,7 @@ new (function() {
         	console.log('>socket.onclose()');
         	clearAllCallbacks();
         	// Set up poller to keep trying to reconnect
-        	timeoutId = setInterval(function(){ if(socket.readyState == 2) {connectToServer();} }, CONNECTION_RETRY_INTERVAL);
+        	timeoutId = setInterval(function(){ if(socket.readyState == 3) {connectToServer();} }, CONNECTION_RETRY_INTERVAL);
         	console.log('<socket.onclose()');
         }
         console.log('<connectToServer()');
