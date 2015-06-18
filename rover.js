@@ -182,15 +182,12 @@ new (function() {
     }
     
     function connectToServer() {
-    	console.log('>connectToServer()');
     	// Check status of socket before attempting to connect
     	if( socket == null || socket.readyState == 3){
 	        socket = new WebSocket('ws://' + ipAddress + ':' + port);
 	        socket.onopen = function(){
-	        	console.log('>socket.onopen');
 	            // Clear any timeouts
 	            if( timeoutId != null ){
-	            	console.log('clearing timeout');
 	            	clearInterval(timeoutId);
 	            	timeoutId = null;
 	            }
@@ -207,14 +204,11 @@ new (function() {
 	        };
 	        
 	        socket.onclose = function () {
-	        	console.log('>socket.onclose()');
 	        	clearAllCallbacks();
 	        	// Set up poller to keep trying to reconnect
 	        	timeoutId = setInterval(function(){ if(socket.readyState == 3) {connectToServer();} }, CONNECTION_RETRY_INTERVAL);
-	        	console.log('<socket.onclose()');
 	        }
     	}
-        console.log('<connectToServer()');
     }
     
     // Requests a report value for reporterName from the server and sets up callback for when data is recieved
