@@ -118,7 +118,7 @@ new (function() {
     function clearAllCallbacks(){
     	// Call all callbacks to prevent GUI from hanging
     	for(waitingReporterCallback in waitingReporterCallbacks){
-    		waitingReporterCallback("");
+    		waitingReporterCallbacks[waitingReporterCallback]("");
     	}
     	waitingReporterCallbacks = {};
     	if( waitingCommandCallback ){
